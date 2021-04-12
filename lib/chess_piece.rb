@@ -45,34 +45,39 @@ class ChessPiece
     }
   end
 
-  def inverted_color(color = @color)
+  def opponent_color(color = @color)
     color == :white ? :black : :white
   end
 
-  def reachable(range, &block)
+  def reachable(range, position = @position, &block)
     Enumerator.new do |yielder|
-      position = block.call(*position)
-      while range.positive? && @board.valid_move_field?(position, @color)
+      loop do
+        position = block.call(*position)
+
+        break unless range.positive? && @board.valid_field?(position, @color)
+
         yielder << position
         range -= 1
-        break if @board.has_piece(position, inverted_color)
+
+        # opponent piece can be captured, but one cannot to move through them
+        break if @board.piece_at?(position, opponent_color)
       end
     end
   end
 
-  def diagonal_positions_in_range(range = move_range.diagonal)
+  def diagonal_positions_in_range(range = move_range[:diagonal])
     return [] if range.zero?
 
     [[1, 1], [1, -1], [-1, -1], [-1, 1]].map do |delta|
-      reachable(range, @position) { |x, y| [x + delta[0], y + delta[1]] }.to_a
+      reachable(range) { |x, y| [x + delta[0], y + delta[1]] }.to_a
     end
   end
 
-  def orthogonal_positions_in_range(range = move_range.orthogonal)
+  def orthogonal_positions_in_range(range = move_range[:orthogonal])
     return [] if range.zero?
 
     [[1, 0], [-1, 0], [0, -1], [0, 1]].map do |delta|
-      reachable(range, @position) { |x, y| [x + delta[0], y + delta[1]] }.to_a
+      reachable(range) { |x, y| [x + delta[0], y + delta[1]] }.to_a
     end
   end
 

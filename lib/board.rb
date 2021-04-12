@@ -26,14 +26,17 @@ class Board
     raise 'not implemented yet'
   end
 
-  private
+  def piece_at?(position, color)
+    raise 'not implemented yet'
+  end
+
+  # checks if a piece of the specified color can be put on position,
+  # disregarding if it is possible to actually move it there by any valid move
+  def valid_field?(position, color)
+    @board.on_board?(position) && !@board.has_piece?(position, color)
+  end
 
   def find_piece(position)
     @pieces.find { |piece| piece.position == position }
-  end
-
-  # checks if a piece of the specified color can be put on position
-  def valid_move_field?(position, color)
-    @board.on_board?(position) && !@board.has_piece?(position, color)
   end
 end
