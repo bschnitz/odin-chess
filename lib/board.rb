@@ -13,8 +13,14 @@ class Board
     @board_range_y = (@min_rank..@max_rank)
   end
 
+  def add_piece(chess_piece_class, color, position)
+    @pieces.push(chess_piece_class.new(color, position, self))
+  end
+
   def setup_pieces
-    raise "not implemented yet"
+    [[@min_rank, :white], [@max_rank, :black]].each do |home_rank, color|
+      raise('not implemented yet')
+    end
   end
 
   # captures any piece at position, returns the captured piece
@@ -47,7 +53,7 @@ class Board
     color == :white ? :black : :white
   end
 
-  def under_attack(position, attacker_color)
+  def under_attack?(position, attacker_color)
     @pieces
       .filter { |piece| piece.color == attacker_color }
       .any? { |piece| piece.move_to?(position, ignore_check: true) }

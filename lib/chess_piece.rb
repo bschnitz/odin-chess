@@ -49,7 +49,11 @@ class ChessPiece
   end
 
   def kingside?
-    @position[0] <= 3
+    @position[0] >= 4
+  end
+
+  def side
+    @position[0] >= 4 ? :kingside : :queenside
   end
 
   private

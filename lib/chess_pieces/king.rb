@@ -5,12 +5,12 @@ require_relative '../chess_piece'
 # represents a king on the chess board
 class King < ChessPiece
   def initialize(color, position, board)
-    super.initialize(color, position, board)
+    super(color, position, board)
 
     home_rank = @color == :white ? 0 : 7
     @castling_positions = {
-      kingside: { x: 2, y: home_rank },
-      queenside: { x: 6, y: home_rank }
+      kingside: [6, home_rank],
+      queenside: [2, home_rank]
     }
   end
 
@@ -22,12 +22,12 @@ class King < ChessPiece
   end
 
   def move_to?(position, board = @board, ignore_check: false)
-    super.move_to?(position, board, ignore_check: ignore_check) &&
+    super(position, board, ignore_check: ignore_check) &&
       !board.king(opponent_color).in_range?(position)
   end
 
   def move_to(position, board = @board)
-    rook = casteling_rook
+    rook = castling_rook(position)
     rook&.move_to(position, nil)
     @movement_history.push(position)
     board&.move_piece(self, position, rook)
@@ -38,26 +38,37 @@ class King < ChessPiece
   end
 
   def in_check?
-    @board.under_attack(position, opponent_color)
+    @board.under_attack?(position, opponent_color)
   end
 
   private
 
-  def rooks_for_casteling
-    # if a rook has been moved once, it can no longer be used for castling
-    rooks = @board.get_rooks(@color).filter { |rook| !rook.moved? }
-
-    rooks.map { |r| r.kingside ? [:kingside, r] : [:queenside, r] }.to_h
+  # check whether this is a castling move and returns the correct rook
+  def castling_rook(move_to_position)
+    castling_side = @castling_positions.key([
+      move_to_position[0],
+      move_to_position[1]
+    ])
+    rooks_for_castling.find do |rook|
+      rook.side == castling_side
+    end
   end
 
-  def moved_over_positions_when_casteling(side)
+  def rooks_for_castling
+    # if a rook has been moved once, it can no longer be used for castling
+    @board.get_rooks(@color).filter do |rook|
+      !rook.captured && !rook.moved?
+    end
+  end
+
+  def moved_over_positions_when_castling(side)
     hr = @board.homerank(@color)
     side == :kingside ? [[5, hr], [6, hr]] : [[3, hr], [2, hr]]
   end
 
-  def attacked_when_casteling?(side)
-    moved_over_positions_when_casteling(side).any? do |position|
-      @board.under_attack(position, opponent_color)
+  def attacked_when_castling?(side)
+    moved_over_positions_when_castling(side).any? do |position|
+      @board.under_attack?(position, opponent_color)
     end
   end
 
@@ -68,22 +79,19 @@ class King < ChessPiece
     # The king is not currently in check.
     return [] if in_check?
 
-    hr = @board.homerank(@color)
-    rooks_for_casteling.filter_map do |side, rook|
-      hr = @board.homerank(@color)
-
+    rooks_for_castling.filter_map do |rook|
       # There are no pieces between the king and the rook.
-      return false unless rook.move_to?(side == :kingside ? [5, hr] : [3, hr])
+      next unless rook.castling_fields_unoccupied?
 
       # the king does not pass through a square that is attacked by an enemy
       # piece and will not end up in check
-      return false if attacked_when_casteling?(side)
+      next if attacked_when_castling?(rook.side)
 
-      @castling_positions[side]
+      @castling_positions[rook.side]
     end
   end
 
   def reachable_positions
-    super.reachable_positions + possible_castling_positions
+    super + [possible_castling_positions]
   end
 end
