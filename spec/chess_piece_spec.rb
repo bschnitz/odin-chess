@@ -10,7 +10,7 @@ describe ChessPiece do
       piece_at?: false,
       valid_field?: true,
       move_piece: nil,
-      undo_latest_move_in_history: nil,
+      undo_last_move: nil,
       check?: false
     )
   end

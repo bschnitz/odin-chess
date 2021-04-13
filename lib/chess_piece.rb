@@ -4,35 +4,52 @@
 # functionalities, but every piece must implement it's specialities itself.
 class ChessPiece
   attr_accessor :captured, :position
+  attr_reader :color
 
   def initialize(color, position, board)
     @board = board
     @position = position
     @color = color
     @captured = false
+    @movement_history = [position]
+  end
+
+  def moved?
+    @movement_history.length > 1
   end
 
   # check whether this piece can move to the specified position
-  def move_to?(position, board = @board)
-    in_range = positions_in_range.any? do |positions|
-      positions.any? { |position_in_range| position_in_range == position }
+  def move_to?(position, board = @board, ignore_check: false)
+    in_range = reachable_positions.any? do |positions|
+      positions.any? { |reachable_position| reachable_position == position }
     end
 
-    # check whether the move would expose the own king to check
-    move_to(position)
-    can_move_to = in_range && !board.check?(@color)
-    board.undo_latest_move_in_history
+    unless ignore_check
+      # check whether the move would expose the own king to check
+      move_to(position)
+      can_move_to = in_range && !board.check?(@color)
+      board.undo_last_move
+    end
 
     can_move_to
   end
 
   # move this piece to the specified position (without validity check)
   def move_to(position, board = @board)
-    board.move_piece(self, position)
+    @movement_history.push(position)
+    board&.move_piece(self, position)
+  end
+
+  def undo_last_move
+    @position = @movement_history.pop
   end
 
   def capture
     @captured = true
+  end
+
+  def kingside?
+    @position[0] <= 3
   end
 
   private
@@ -46,7 +63,7 @@ class ChessPiece
   end
 
   def opponent_color(color = @color)
-    color == :white ? :black : :white
+    @board.opponent_color(color)
   end
 
   def reachable(range, position = @position, &block)
@@ -60,12 +77,12 @@ class ChessPiece
         range -= 1
 
         # opponent piece can be captured, but one cannot to move through them
-        break if @board.piece_at?(position, opponent_color)
+        break if @board.piece_at?(position) { |p| p.color == opponent_color }
       end
     end
   end
 
-  def diagonal_positions_in_range(range = move_range[:diagonal])
+  def reachable_diagonal_positions(range = move_range[:diagonal])
     return [] if range.zero?
 
     [[1, 1], [1, -1], [-1, -1], [-1, 1]].map do |delta|
@@ -73,7 +90,7 @@ class ChessPiece
     end
   end
 
-  def orthogonal_positions_in_range(range = move_range[:orthogonal])
+  def reachable_orthogonal_positions(range = move_range[:orthogonal])
     return [] if range.zero?
 
     [[1, 0], [-1, 0], [0, -1], [0, 1]].map do |delta|
@@ -81,7 +98,7 @@ class ChessPiece
     end
   end
 
-  def positions_in_range
-    diagonal_positions_in_range + orthogonal_positions_in_range
+  def reachable_positions
+    reachable_diagonal_positions + reachable_orthogonal_positions
   end
 end
