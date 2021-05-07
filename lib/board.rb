@@ -9,6 +9,8 @@ require_relative 'chess_pieces/king'
 
 # represents the Chess board, stores all pieces and their positions
 class Board
+  attr_reader :max_rank, :max_column, :pieces
+
   X_START_POSITIONS = [
     [Rook,   [0, 7]],
     [Knight, [1, 6]],
@@ -23,7 +25,9 @@ class Board
     @history = []
     @min_rank = 0
     @max_rank = 7
-    @board_range_x = (0..7)
+    @min_column = 0
+    @max_column = 7
+    @board_range_x = (@min_column..@max_column)
     @board_range_y = (@min_rank..@max_rank)
     setup_pieces
   end
