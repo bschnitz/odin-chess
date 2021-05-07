@@ -44,6 +44,16 @@ describe King do
         it 'allows a castling move to kingside' do
           expect(subject.move_to?([6, 0])).to eq true
         end
+
+        it 'moves the rook to the correct position on kingside' do
+          expect(rook_kingside).to receive(:move_to).with([5, 0], nil)
+          subject.move_to([6, 0])
+        end
+
+        it 'moves the rook to the correct position on queenside' do
+          expect(rook_queenside).to receive(:move_to).with([3, 0], nil)
+          subject.move_to([2, 0])
+        end
       end
 
       context 'when a field on kingside is under attack' do

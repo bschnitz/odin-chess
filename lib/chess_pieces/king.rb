@@ -27,7 +27,7 @@ class King < ChessPiece
 
   def move_to(position, board = @board)
     rook = castling_rook(position)
-    rook&.move_to(position, nil)
+    rook&.move_to([rook.side == :kingside ? x + 1 : x - 1, y], nil)
     @movement_history.push(position)
     board&.move_piece(self, position, rook: rook)
   end
