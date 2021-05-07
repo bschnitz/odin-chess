@@ -1,9 +1,22 @@
 # frozen_string_literal: true
 
+require_relative 'chess_pieces/pawn'
+require_relative 'chess_pieces/rook'
+require_relative 'chess_pieces/knight'
+require_relative 'chess_pieces/bishop'
+require_relative 'chess_pieces/queen'
 require_relative 'chess_pieces/king'
 
 # represents the Chess board, stores all pieces and their positions
 class Board
+  X_START_POSITIONS = [
+    [Rook,   [0, 7]],
+    [Knight, [1, 6]],
+    [Bishop, [2, 5]],
+    [Queen,  [3]],
+    [King,   [4]]
+  ].freeze
+
   def initialize
     @pieces = []
     @captured = []
@@ -12,6 +25,7 @@ class Board
     @max_rank = 7
     @board_range_x = (0..7)
     @board_range_y = (@min_rank..@max_rank)
+    setup_pieces
   end
 
   def add_piece(chess_piece_class, color, position)
@@ -20,7 +34,12 @@ class Board
 
   def setup_pieces
     [[@min_rank, :white], [@max_rank, :black]].each do |home_rank, color|
-      raise('not implemented yet')
+      (0..7).each { |x| @pieces.push(Pawn.create(color, x, self)) }
+      X_START_POSITIONS.each do |piece_class, x_positions|
+        x_positions.each do |x|
+          @pieces.push(piece_class.new(color, [x, home_rank], self))
+        end
+      end
     end
   end
 

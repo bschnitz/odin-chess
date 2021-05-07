@@ -18,18 +18,22 @@ class Pawn < ChessPiece
     [pos[0], pos[1] - move_delta] if attackable_by_en_passant?(position)
   end
 
+  def self.start_row(color)
+    color == :white ? 1 : 6
+  end
+
+  def self.create(color, x_pos, board)
+    Pawn.new(color, [x_pos, Pawn.start_row(color)], board)
+  end
+
   private
 
   def double_move?(position)
     position == [@position[0], @position[1] + move_delta]
   end
 
-  def start_row
-    @color == :white ? 1 : 6
-  end
-
   def on_start_row?
-    @position[1] == start_row
+    @position[1] == Pawn.start_row(@color)
   end
 
   def move_delta
