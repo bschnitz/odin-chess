@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require_relative '../../lib/board'
-require_relative '../../lib/chess_pieces/rook'
+require_relative '../../lib/chess_pieces/bishop'
 
-describe Rook do
+describe Bishop do
   let(:board) do
     instance_double(
       Board,
@@ -19,18 +19,18 @@ describe Rook do
   end
 
   context 'when at [d, 3] ([3, 2])' do
-    subject { Rook.new(:white, [3, 2], board) }
+    subject { Bishop.new(:white, [3, 2], board) }
 
-    it 'can move to [d, 1] (3, 0)' do
-      expect(subject.move_to?([3, 0])).to eq true
+    it 'can move to [f, 1] (5, 0)' do
+      expect(subject.move_to?([5, 0])).to eq true
     end
 
-    it 'can move to [b, 3] (1, 2)' do
-      expect(subject.move_to?([1, 2])).to eq true
+    it 'can move to [f, 5] (5, 4)' do
+      expect(subject.move_to?([5, 4])).to eq true
     end
 
-    it 'cannot move to [f, 5] (5, 4)' do
-      expect(subject.move_to?([5, 4])).to eq false
+    it 'cannot move to [e, 5] (4, 4)' do
+      expect(subject.move_to?([4, 4])).to eq false
     end
   end
 end

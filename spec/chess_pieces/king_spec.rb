@@ -91,7 +91,8 @@ describe King do
       end
 
       context 'when the rook on kingside has moved already' do
-        before do allow(rook_kingside).to receive(:moved?).and_return(true)
+        before do
+          allow(rook_kingside).to receive(:moved?).and_return(true)
         end
 
         it 'disallows a castling move to kingside' do
