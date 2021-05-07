@@ -13,6 +13,14 @@ class ChessPiece
     @movement_history = [position]
   end
 
+  def x
+    @position[0]
+  end
+
+  def y
+    @position[1]
+  end
+
   def moved?
     @movement_history.length > 1
   end
@@ -44,15 +52,15 @@ class ChessPiece
   end
 
   def kingside?
-    @position[0] >= 4
+    x >= 4
   end
 
   def side
-    @position[0] >= 4 ? :kingside : :queenside
+    kingside? ? :kingside : :queenside
   end
 
   def at?(position_x, position_y)
-    @position[0] == position_x && @position[1] == position_y
+    x == position_x && y == position_y
   end
 
   private
@@ -103,5 +111,9 @@ class ChessPiece
 
   def reachable_positions
     reachable_diagonal_positions + reachable_orthogonal_positions
+  end
+
+  def positions_from_deltas(deltas)
+    deltas.map { |(x_delta, y_delta)| [x + x_delta, y + y_delta] }
   end
 end
