@@ -6,6 +6,7 @@ require_relative 'chess_pieces/king'
 class Board
   def initialize
     @pieces = []
+    @captured = []
     @history = []
     @min_rank = 0
     @max_rank = 7
@@ -26,17 +27,19 @@ class Board
   # captures any piece at position, returns the captured piece
   def capture_piece(position)
     piece = piece_at(position)
-    piece&.captured = true
+    @captured.push(piece) if piece
+    @pieces.delete(piece)
     piece
   end
 
-  def move_piece(piece, to, rook = nil)
-    captured_piece = capture_piece(to)
+  def move_piece(piece, to, rook: nil, pawn_double_move: false, capture_at: nil)
+    captured_piece = capture_piece(capture_at || to)
 
     @history.push({
       moved_piece: piece,
       moved_rook: rook,
-      captured_piece: captured_piece
+      captured_piece: captured_piece,
+      pawn_double_move: pawn_double_move
     })
 
     piece.position = to
@@ -46,7 +49,11 @@ class Board
     last = history.pop
     last.moved_piece.undo_last_move
     last.moved_rook&.undo_last_move
-    last.captured_piece.captured = false
+    @pieces.push(@captured.pop) if last.captured_piece
+  end
+
+  def last
+    history[-1]
   end
 
   def opponent_color(color)
@@ -70,9 +77,9 @@ class Board
 
   def piece_at(position, &block)
     if block_given?
-      @pieces.find { |piece| piece.position == position && block.call }
+      @pieces.find { |piece| piece.at?(*position) && block.call }
     else
-      @pieces.find { |piece| piece.position == position }
+      @pieces.find { |piece| piece.at?(*position) }
     end
   end
 

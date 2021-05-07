@@ -13,7 +13,8 @@ describe King do
       move_piece: nil,
       undo_last_move: nil,
       check?: false,
-      under_attack?: false
+      under_attack?: false,
+      homerank: 7
     )
   end
 

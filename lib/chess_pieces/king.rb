@@ -7,10 +7,9 @@ class King < ChessPiece
   def initialize(color, position, board)
     super(color, position, board)
 
-    home_rank = @color == :white ? 0 : 7
     @castling_positions = {
-      kingside: [6, home_rank],
-      queenside: [2, home_rank]
+      kingside: [6, @board.homerank(@color)],
+      queenside: [2, @board.homerank(@color)]
     }
   end
 
@@ -30,7 +29,7 @@ class King < ChessPiece
     rook = castling_rook(position)
     rook&.move_to(position, nil)
     @movement_history.push(position)
-    board&.move_piece(self, position, rook)
+    board&.move_piece(self, position, rook: rook)
   end
 
   def in_range?(position)
@@ -56,9 +55,7 @@ class King < ChessPiece
 
   def rooks_for_castling
     # if a rook has been moved once, it can no longer be used for castling
-    @board.get_rooks(@color).filter do |rook|
-      !rook.captured && !rook.moved?
-    end
+    @board.get_rooks(@color).filter { |rook| !rook.moved? }
   end
 
   def moved_over_positions_when_castling(side)

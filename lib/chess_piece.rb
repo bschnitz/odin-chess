@@ -3,14 +3,13 @@
 # base class of a chess piece. it provides an interface and implements basic
 # functionalities, but every piece must implement it's specialities itself.
 class ChessPiece
-  attr_accessor :captured, :position
+  attr_accessor :position
   attr_reader :color
 
   def initialize(color, position, board)
     @board = board
     @position = position
     @color = color
-    @captured = false
     @movement_history = [position]
   end
 
@@ -44,16 +43,16 @@ class ChessPiece
     @position = @movement_history.pop
   end
 
-  def capture
-    @captured = true
-  end
-
   def kingside?
     @position[0] >= 4
   end
 
   def side
     @position[0] >= 4 ? :kingside : :queenside
+  end
+
+  def at?(position_x, position_y)
+    @position[0] == position_x && @position[1] == position_y
   end
 
   private
